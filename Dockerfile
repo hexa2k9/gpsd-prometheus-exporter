@@ -1,15 +1,19 @@
-FROM python:alpine3.10
+FROM debian:bookworm-slim
 
-RUN pip install prometheus_client
-RUN pip install gps
+RUN set -eux; \
+  export DEBIAN_FRONTEND=noninteractive; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    python3-gps \
+    python3-pkg-resources \
+    python3-prometheus-client \
+  ; \
+  find /var/lib/apt/lists -mindepth 1 -delete
 
 WORKDIR /app
-
 COPY . /app
 
-ENV GEOPOINT_LON=38.897809878104574
-ENV GEOPOINT_LAT=-77.03655125936501
-
+ENV GEOPOINT_LON=0.00
+ENV GEOPOINT_LAT=0.00
 
 CMD [ "./entrypoint.sh" ]
-
