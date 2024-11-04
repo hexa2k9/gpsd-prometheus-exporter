@@ -11,9 +11,10 @@ RUN set -eux; \
   find /var/lib/apt/lists -mindepth 1 -delete
 
 WORKDIR /app
-COPY . /app
+ADD entrypoint.sh /app
+ADD gpsd_exporter.py /app
 
 ENV GEOPOINT_LON=0.00
 ENV GEOPOINT_LAT=0.00
 
-CMD [ "./entrypoint.sh" ]
+CMD [ "/bin/bash", "/app/entrypoint.sh" ]
