@@ -1,0 +1,4 @@
+# https://test.pypi.org
+
+-i https://test.pypi.org/simple/
+gps-pessimus==3.25.0.478

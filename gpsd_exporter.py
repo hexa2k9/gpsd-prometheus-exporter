@@ -50,13 +50,9 @@ DEFAULT_HOST = 'localhost'
 NSEC=1000000000
 USEC=1000000
 MSEC=1000
-    
+
 class DepencendyError(Exception):
     pass
-
-from packaging.version import parse
-if parse(gps.__version__) < parse("3.18"):
-    raise DepencendyError('Please upgrade the python gps package to 3.18 or higher.')
 
 class CLIError(Exception):
     '''Generic exception to raise and log different fatal errors.'''

@@ -1,20 +1,34 @@
-FROM debian:bookworm-slim
+FROM python:3.12-alpine3.20 AS builder
 
-RUN set -eux; \
-  export DEBIAN_FRONTEND=noninteractive; \
-  apt-get update; \
-  apt-get install -y --no-install-recommends \
-    python3-gps \
-    python3-packaging \
-    python3-prometheus-client \
-  ; \
-  find /var/lib/apt/lists -mindepth 1 -delete
+ADD . /work
+WORKDIR /work
 
-WORKDIR /app
-ADD entrypoint.sh /app
-ADD gpsd_exporter.py /app
+RUN set -eux \
+  && apk update \
+  && apk add musl-dev gcc \
+  && pip install virtualenv \
+  && virtualenv /opt/virtualenv \
+  && /opt/virtualenv/bin/pip install -r requirements.txt \
+  && /opt/virtualenv/bin/pip install -r requirements.gps.txt
 
-ENV GEOPOINT_LON=0.00
-ENV GEOPOINT_LAT=0.00
+FROM python:3.12-alpine3.20
 
-CMD [ "/bin/bash", "/app/entrypoint.sh" ]
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PATH=/opt/virtualenv/bin:${PATH}
+
+RUN set -eux \
+  && mkdir -p /work \
+  && apk --no-cache upgrade  \
+  && apk --no-cache add bash
+
+ADD entrypoint.sh /work
+ADD gpsd_exporter.py /work
+
+WORKDIR /work
+
+COPY --from=builder /opt/virtualenv /opt/virtualenv
+
+EXPOSE 9015
+
+CMD [ "bash", "/work/entrypoint.sh" ]
