@@ -5,7 +5,7 @@ RUN set -eux; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
     python3-gps \
-    python3-pkg-resources \
+    python3-packaging \
     python3-prometheus-client \
   ; \
   find /var/lib/apt/lists -mindepth 1 -delete
