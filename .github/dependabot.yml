@@ -12,6 +12,13 @@ updates:
     assignees:
       - "hexa2k9"
 
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "hexa2k9"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
