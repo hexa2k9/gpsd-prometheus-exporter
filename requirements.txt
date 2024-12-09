@@ -1,2 +1,2 @@
 -i https://pypi.org/simple
-prometheus-client==0.21.0; python_version >= '3.8'
+prometheus-client==0.21.1; python_version >= '3.8'
