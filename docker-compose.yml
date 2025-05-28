@@ -1,17 +1,25 @@
-version: "3"
 services:
 
-  gpsd-exporter:
-    image: ghcr.io/ncareau/gpsd-prometheus-exporter:latest
-    container_name: gpsd-exporter
+  gpsdx:
+    image: ghcr.io/dziban303/gpsd-prometheus-exporter:latest
+    container_name: gpsdx
+    hostname: gpsdx
     ports:
-      - 9015:9015
+       - 9015:9015
     environment:
-      - GPSD_HOST=host.docker.internal
-      - GPSD_PORT=2947
-      - GEOPOINT_LON=38.897809878
-      - GEOPOINT_LAT=-77.036551259
-      - PPS_BUCKET_SIZE=50000
+       - TZ=America/Chicago                 # Not actually used at the moment
+       - GPSD_HOST=host.docker.internal     # GPSD host IP, or this if running on the same host
+       - GPSD_PORT=2947                     # GPSd port, default is 2947
+       - GEOPOINT_LAT=30.682005445776123    # your latitude. This is to plot variance over time. You don't need 15 decimal places, that's on the order of 111 picometers, or twice the radius of a hydrogen atom
+       - GEOPOINT_LON=-88.014337656212641   # your longitude. Same as above. 8 decimal places is about 1 mm
+       - GEO_BUCKET_SIZE=0.5                # Bucket size in meters for the geo histogram (default is 0.5m)
+       - GEO_BUCKET_COUNT=40                # Number of buckets for the geo histogram (default is 40)
+       - PPS_BUCKET_SIZE=250                # Bucket size in nanoseconds for the PPS histogram (default is 250ns)
+       - PPS_BUCKET_COUNT=40                # Number of buckets for the PPS histogram (default is 40)          
+       - PPS_TIME1=0                        # Local pps clock (offset) time1 (ntp.conf) [default: 0]
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: unless-stopped
+    volumes:
+       - "/etc/localtime:/etc/localtime:ro"  # Not actually used at the moment
+       - "/etc/timezone:/etc/timezone:ro"    # Not actually used at the moment
