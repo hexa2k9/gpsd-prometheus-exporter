@@ -18,39 +18,39 @@ Make sure gpsd, prometheus and grafana are properly running. `gpsd-prometheus-ex
 * gps-python libraries [gps](https://gpsd.gitlab.io/gpsd/) Note that this exporter needs at least version 3.19 of the lib's. Normally this comes with the installation of gpsd. 
 
 To install:
-
+```sh
 	apt update
 	apt install python3-prometheus-client
 	apt install python3-gps
-
+```
 If you want the `gpsd-prometheus-exporter` to be loaded automatically by `systemd` please copy `gpsd_monitor.defaults` to 
 `/etc/default/gpsd_monitor.defaults` and `gpsd_monitor.service` to `/lib/systemd/system`
-
+```sh
 	git clone https://github.com/brendanbank/gpsd-prometheus-exporter.git
 	cd gpsd-prometheus-exporter
 	cp gpsd_exporter.defaults /etc/default
 	cp gpsd_exporter.service /etc/systemd/system
 	cp gpsd_exporter.py /usr/local/bin
-
+```
 Make sure `gpsd_exporter.py` has the execution bit set:
-
+```sh
 	chmod +x /usr/local/bin/gpsd_exporter.py
-	
+```	
 And enable the service to run at boot.
-	
+```sh
 	systemctl enable gpsd_exporter.service
 	systemctl start gpsd_exporter.service
-	
+```	
 Some U-Blox GPS units need to be forced to 115200 baud
 
 Check out [gps_setserial.service](https://github.com/brendanbank/gpsd-prometheus-exporter/blob/master/gps_setserial.service) to run at boot time. 
 	
 The default tcp port is 9015. You can test if the exporter is up by running the follwing command on the local machine:
-
+```sh
 	curl -s localhost:9015
-	
+```	
 And you should see output like this:
-
+```text
 	# HELP gpsd_gdop Geometric (hyperspherical) dilution of precision
 	# TYPE gpsd_gdop gauge
 	gpsd_gdop 1.36
@@ -90,17 +90,17 @@ And you should see output like this:
 	gpsd_devices_info{activated="2021-01-20T12:22:31.083Z",bps="115200",cycle="1.0",device="/dev/ttyS0",driver="u-blox",flags="1",mincycle="0.25",native="1",parity="N",stopbits="1",subtype="SW ROM CORE 3.01 (107888),HW 00080000",subtype1=",FWVER=SPG 3.01,PROTVER=18.00,GPS;GLO;GAL;BDS,SBAS;IMES;QZSS"} 1.0
 	gpsd_devices_info{activated="2021-01-20T12:22:31.003Z",bps="Unknown",cycle="Unknown",device="/dev/pps0",driver="PPS",flags="Unknown",mincycle="Unknown",native="Unknown",parity="Unknown",stopbits="Unknown",subtype="Unknown",subtype1="Unknown"} 1.0
 	...
-
+```
 To make sure prometheus is polling the exporter add the following line to `/etc/prometheus/prometheus.yml` on the prometheus server.
-
+```yaml
 	  - job_name: gps
     	static_configs:
         - targets: 
                 - <hostname>:9015
-
+```
 Be careful not to break with the yml document format as it will block propper startup of prometheus.
 
-I've included a [grafana dashboard json file](https://raw.githubusercontent.com/brendanbank/gpsd-prometheus-exporter/main/gpsd_grafana_dashboard.json) which you can load into grafana.
+I've included a [grafana dashboard json file](https://github.com/dziban303/gpsd-prometheus-exporter/blob/main/gpsd_grafana_dashboard.json) which you can load into grafana.
 
  
 ## Per Satellite data
@@ -111,7 +111,9 @@ I've included a [grafana dashboard json file](https://raw.githubusercontent.com/
 
 If you enable gpsd to monitor your pps device by starting
 
+```sh
 	gpsd <option> [serial port path] [/dev/pps[0-..]
+```
 
 the exporter will monitor the clock offset from from the pps signal. And you can monitor the offset of your system clock.
 
@@ -122,7 +124,7 @@ To enable pps monitoring add `--pps-histogram` to the runtime arguments of `gpsd
 
 ## runtime commands
 
-
+```help
 	usage: gpsd_exporter.py [-h] [-v] [-V] [-d] [-p PORT] [-H HOSTNAME] [-E EXPORTER_PORT] [-S]
 	                        [--offset-from-geopoint] [--geopoint-lat GEO_LAT] [--geopoint-lon GEO_LON]
 	                        [--geo-bucket-size GEO_BUCKET_SIZE] [--geo-bucket-count GEO_BUCKET_COUNT]
@@ -171,13 +173,14 @@ To enable pps monitoring add `--pps-histogram` to the runtime arguments of `gpsd
 	                        Bucket count of PPS histogram [default: 40]
 	  --pps-time1 PPS_TIME1
 	                        Local pps clock (offset) time1 (ntp.conf) [default: 0]
-	
+```
+
 ## Docker 
 
 You can run this software with docker. 
 
 ### Docker Run
-
+```bash
     docker run -d --name gpsd-exporter \
         -p 9015:9015 \
         -e GPSD_HOST=192.168.1.10 \
@@ -185,44 +188,62 @@ You can run this software with docker.
         -e GEOPOINT_LON=38.897809878 \
         -e GEOPOINT_LAT=-77.036551259 \
         ghcr.io/ncareau/gpsd-prometheus-exporter:latest
+```
 
 ### Docker Compose
 
 An example `docker-compose.yml` is provided in the root directory of this project. 
 
-    gpsd-exporter:
-        image: ghcr.io/ncareau/gpsd-prometheus-exporter:latest
-        container_name: gpsd-exporter
-        ports:
-            - 9015:9015
-        environment:
-            - GPSD_HOST=127.0.0.1 
-            - GPSD_PORT=2947
-            - GEOPOINT_LON=38.897809878
-            - GEOPOINT_LAT=-77.036551259
-        restart: unless-stopped
+```yaml
+services:
+  gpsdx:
+    image: ghcr.io/dziban303/gpsd-prometheus-exporter:latest
+    container_name: gpsdx
+    hostname: gpsdx
+    ports:
+       - 9015:9015
+    environment:
+       - TZ=America/Chicago                 # Not actually used at the moment
+       - GPSD_HOST=host.docker.internal     # GPSD host IP, or this if running on the same host
+       - GPSD_PORT=2947                     # GPSd port, default is 2947
+       - GEOPOINT_LAT=30.682005445776123    # your latitude. This is to plot variance over time. You don't need 15 decimal places, that's on the order of 111 picometers, or twice the radius of a hydrogen atom
+       - GEOPOINT_LON=-88.014337656212641   # your longitude. Same as above. 8 decimal places is about 1 mm
+       - GEO_BUCKET_SIZE=0.5                # Bucket size in meters for the geo histogram (default is 0.5m)
+       - GEO_BUCKET_COUNT=40                # Number of buckets for the geo histogram (default is 40)
+       - PPS_BUCKET_SIZE=250                # Bucket size in nanoseconds for the PPS histogram (default is 250ns)
+       - PPS_BUCKET_COUNT=40                # Number of buckets for the PPS histogram (default is 40)          
+       - PPS_TIME1=0                        # Local pps clock (offset) time1 (ntp.conf) [default: 0]
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+       - "/etc/localtime:/etc/localtime:ro"  # Not actually used at the moment
+       - "/etc/timezone:/etc/timezone:ro"    # Not actually used at the moment
+```
 
 ### GPSd on Host
 
 If the gpsd daemon run directly on the host, you must either use network_mode: host
 
+```bash
     # Docker CLI
     --network=host
-
+```
+```yaml
     # Docker Compose
     network_mode: host
-
+```
 or by adding `host.docker.internal` to connect the host
-
+```bash
     # Docker CLI - Remove "-p 9015:9015"
     -e GPSD_HOST=host.docker.internal \
     --add-host=host.docker.internal:host-gateway \
-
-
+```
+```yaml
     # Docker compose - Remove `ports:`
     extra_hosts:
         - "host.docker.internal:host-gateway"
 
     environment:
         - GPSD_HOST=host.docker.internal
-
+```
