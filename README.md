@@ -18,83 +18,83 @@ Make sure gpsd, prometheus and grafana are properly running. `gpsd-prometheus-ex
 * gps-python libraries [gps](https://gpsd.gitlab.io/gpsd/) Note that this exporter needs at least version 3.19 of the lib's. Normally this comes with the installation of gpsd. 
 
 To install:
-```sh
-	apt update
-	apt install python3-prometheus-client
-	apt install python3-gps
+```bash
+apt update
+apt install python3-prometheus-client
+apt install python3-gps
 ```
 If you want the `gpsd-prometheus-exporter` to be loaded automatically by `systemd` please copy `gpsd_monitor.defaults` to 
 `/etc/default/gpsd_monitor.defaults` and `gpsd_monitor.service` to `/lib/systemd/system`
-```sh
-	git clone https://github.com/brendanbank/gpsd-prometheus-exporter.git
-	cd gpsd-prometheus-exporter
-	cp gpsd_exporter.defaults /etc/default
-	cp gpsd_exporter.service /etc/systemd/system
-	cp gpsd_exporter.py /usr/local/bin
+```bash
+git clone https://github.com/brendanbank/gpsd-prometheus-exporter.git
+cd gpsd-prometheus-exporter
+cp gpsd_exporter.defaults /etc/default
+cp gpsd_exporter.service /etc/systemd/system
+cp gpsd_exporter.py /usr/local/bin
 ```
 Make sure `gpsd_exporter.py` has the execution bit set:
-```sh
-	chmod +x /usr/local/bin/gpsd_exporter.py
-```	
+```bash
+chmod +x /usr/local/bin/gpsd_exporter.py
+```
 And enable the service to run at boot.
-```sh
-	systemctl enable gpsd_exporter.service
-	systemctl start gpsd_exporter.service
-```	
+```bash
+systemctl enable gpsd_exporter.service
+systemctl start gpsd_exporter.service
+```
 Some U-Blox GPS units need to be forced to 115200 baud
 
 Check out [gps_setserial.service](https://github.com/brendanbank/gpsd-prometheus-exporter/blob/master/gps_setserial.service) to run at boot time. 
-	
+
 The default tcp port is 9015. You can test if the exporter is up by running the follwing command on the local machine:
-```sh
-	curl -s localhost:9015
-```	
+```bash
+curl -s localhost:9015
+```
 And you should see output like this:
 ```text
-	# HELP gpsd_gdop Geometric (hyperspherical) dilution of precision
-	# TYPE gpsd_gdop gauge
-	gpsd_gdop 1.36
-	# HELP gpsd_hdop Horizontal dilution of precision
-	# TYPE gpsd_hdop gauge
-	gpsd_hdop 0.74
-	gpsd_xdop 0.39
-	# HELP gpsd_nSat Number of satellite objects in "satellites" array
-	# TYPE gpsd_nSat gauge
-	gpsd_nSat 0.0
-	# HELP gpsd_uSat Number of satellites used in navigation solution.
-	# TYPE gpsd_uSat gauge
-	gpsd_uSat 0.0
-	# HELP gpsd_lat Latitude in degrees: +/- signifies North/South.
-	# TYPE gpsd_lat gauge
-	gpsd_lat 52.4240029
-	# HELP gpsd_long Longitude in degrees: +/- signifies East/West.
-	# TYPE gpsd_long gauge
-	gpsd_long 4.6157675
-	# HELP gpsd_altHAE Altitude, height above allipsoid, in meters. Probably WGS84.
-	# TYPE gpsd_altHAE gauge
-	gpsd_altHAE 62.191
-	# HELP gpsd_altMSL MSL Altitude in meters. The geoid used is rarely specified and is often inaccurate.
-	# TYPE gpsd_altMSL gauge
-	gpsd_altMSL 16.309
-	# HELP gpsd_sat_used Used in current solution? 
-	# TYPE gpsd_sat_used gauge
-	gpsd_sat_used 19.0
-	# HELP gpsd_sat_seen Seen in current solution? 
-	# TYPE gpsd_sat_seen gauge
-	gpsd_sat_seen 34.0
-	# HELP gpsd_version_info Version Details
-	# TYPE gpsd_version_info gauge
-	gpsd_version_info{proto_major="3",proto_minor="14",release="3.20",rev="3.20"} 1.0
-	# HELP gpsd_devices_info Device Details
-	# TYPE gpsd_devices_info gauge
-	gpsd_devices_info{activated="2021-01-20T12:22:31.083Z",bps="115200",cycle="1.0",device="/dev/ttyS0",driver="u-blox",flags="1",mincycle="0.25",native="1",parity="N",stopbits="1",subtype="SW ROM CORE 3.01 (107888),HW 00080000",subtype1=",FWVER=SPG 3.01,PROTVER=18.00,GPS;GLO;GAL;BDS,SBAS;IMES;QZSS"} 1.0
-	gpsd_devices_info{activated="2021-01-20T12:22:31.003Z",bps="Unknown",cycle="Unknown",device="/dev/pps0",driver="PPS",flags="Unknown",mincycle="Unknown",native="Unknown",parity="Unknown",stopbits="Unknown",subtype="Unknown",subtype1="Unknown"} 1.0
-	...
+# HELP gpsd_gdop Geometric (hyperspherical) dilution of precision
+# TYPE gpsd_gdop gauge
+gpsd_gdop 1.36
+# HELP gpsd_hdop Horizontal dilution of precision
+# TYPE gpsd_hdop gauge
+gpsd_hdop 0.74
+gpsd_xdop 0.39
+# HELP gpsd_nSat Number of satellite objects in "satellites" array
+# TYPE gpsd_nSat gauge
+gpsd_nSat 0.0
+# HELP gpsd_uSat Number of satellites used in navigation solution.
+# TYPE gpsd_uSat gauge
+gpsd_uSat 0.0
+# HELP gpsd_lat Latitude in degrees: +/- signifies North/South.
+# TYPE gpsd_lat gauge
+gpsd_lat 52.4240029
+# HELP gpsd_long Longitude in degrees: +/- signifies East/West.
+# TYPE gpsd_long gauge
+gpsd_long 4.6157675
+# HELP gpsd_altHAE Altitude, height above allipsoid, in meters. Probably WGS84.
+# TYPE gpsd_altHAE gauge
+gpsd_altHAE 62.191
+# HELP gpsd_altMSL MSL Altitude in meters. The geoid used is rarely specified and is often inaccurate.
+# TYPE gpsd_altMSL gauge
+gpsd_altMSL 16.309
+# HELP gpsd_sat_used Used in current solution? 
+# TYPE gpsd_sat_used gauge
+gpsd_sat_used 19.0
+# HELP gpsd_sat_seen Seen in current solution? 
+# TYPE gpsd_sat_seen gauge
+gpsd_sat_seen 34.0
+# HELP gpsd_version_info Version Details
+# TYPE gpsd_version_info gauge
+gpsd_version_info{proto_major="3",proto_minor="14",release="3.20",rev="3.20"} 1.0
+# HELP gpsd_devices_info Device Details
+# TYPE gpsd_devices_info gauge
+gpsd_devices_info{activated="2021-01-20T12:22:31.083Z",bps="115200",cycle="1.0",device="/dev/ttyS0",driver="u-blox",flags="1",mincycle="0.25",native="1",parity="N",stopbits="1",subtype="SW ROM CORE 3.01 (107888),HW 00080000",subtype1=",FWVER=SPG 3.01,PROTVER=18.00,GPS;GLO;GAL;BDS,SBAS;IMES;QZSS"} 1.0
+gpsd_devices_info{activated="2021-01-20T12:22:31.003Z",bps="Unknown",cycle="Unknown",device="/dev/pps0",driver="PPS",flags="Unknown",mincycle="Unknown",native="Unknown",parity="Unknown",stopbits="Unknown",subtype="Unknown",subtype1="Unknown"} 1.0
+...
 ```
 To make sure prometheus is polling the exporter add the following line to `/etc/prometheus/prometheus.yml` on the prometheus server.
 ```yaml
-	  - job_name: gps
-    	static_configs:
+  - job_name: gps
+    static_configs:
         - targets: 
                 - <hostname>:9015
 ```
@@ -111,8 +111,8 @@ I've included a [grafana dashboard json file](https://github.com/dziban303/gpsd-
 
 If you enable gpsd to monitor your pps device by starting
 
-```sh
-	gpsd <option> [serial port path] [/dev/pps[0-..]
+```bash
+gpsd <option> [serial port path] [/dev/pps[0-..]
 ```
 
 the exporter will monitor the clock offset from from the pps signal. And you can monitor the offset of your system clock.
@@ -125,54 +125,54 @@ To enable pps monitoring add `--pps-histogram` to the runtime arguments of `gpsd
 ## runtime commands
 
 ```help
-	usage: gpsd_exporter.py [-h] [-v] [-V] [-d] [-p PORT] [-H HOSTNAME] [-E EXPORTER_PORT] [-S]
-	                        [--offset-from-geopoint] [--geopoint-lat GEO_LAT] [--geopoint-lon GEO_LON]
-	                        [--geo-bucket-size GEO_BUCKET_SIZE] [--geo-bucket-count GEO_BUCKET_COUNT]
-	                        [--pps-histogram] [--pps-bucket-size PPS_BUCKET_SIZE]
-	                        [--pps-bucket-count PPS_BUCKET_COUNT] [--pps-time1 PPS_TIME1]
-	
-	gpsd_exporter -- Exporter for gpsd output
-	
-	  Created by Brendan Bank on 2021-01-10.
-	  Copyright 2021 Brendan Bank. All rights reserved.
-	
-	  Licensed under the BSD-3-Clause
-	  https://opensource.org/licenses/BSD-3-Clause
-	
-	  Distributed on an "AS IS" basis without warranties
-	  or conditions of any kind, either express or implied.
-	
-	USAGE
-	
-	options:
-	  -h, --help            show this help message and exit
-	  -v, --verbose         set verbosity level [default: None]
-	  -V, --version         show program's version number and exit
-	  -d, --debug           set debug level [default: 0]
-	  -p PORT, --port PORT  set gpsd TCP Port number [default: 2947]
-	  -H HOSTNAME, --hostname HOSTNAME
-	                        set gpsd TCP Hostname/IP address [default: localhost]
-	  -E EXPORTER_PORT, --exporter-port EXPORTER_PORT
-	                        set TCP Port for the exporter server [default: 9015]
-	  -S, --disable-monitor-satellites
-	                        Stops monitoring all satellites individually
-	  --offset-from-geopoint
-	                        track offset (x,y offset and distance) from a stationary location.
-	  --geopoint-lat GEO_LAT
-	                        Latitude of a fixed stationary location.
-	  --geopoint-lon GEO_LON
-	                        Longitude of a fixed stationary location.
-	  --geo-bucket-size GEO_BUCKET_SIZE
-	                        Bucket side of Geo histogram [default: 0.5 meter]
-	  --geo-bucket-count GEO_BUCKET_COUNT
-	                        Bucket count of Geo histogram [default: 40]
-	  --pps-histogram       generate histogram data from pps devices.
-	  --pps-bucket-size PPS_BUCKET_SIZE
-	                        Bucket side of PPS histogram in nanoseconds. [default: 250 ns]
-	  --pps-bucket-count PPS_BUCKET_COUNT
-	                        Bucket count of PPS histogram [default: 40]
-	  --pps-time1 PPS_TIME1
-	                        Local pps clock (offset) time1 (ntp.conf) [default: 0]
+usage: gpsd_exporter.py [-h] [-v] [-V] [-d] [-p PORT] [-H HOSTNAME] [-E EXPORTER_PORT] [-S]
+                        [--offset-from-geopoint] [--geopoint-lat GEO_LAT] [--geopoint-lon GEO_LON]
+                        [--geo-bucket-size GEO_BUCKET_SIZE] [--geo-bucket-count GEO_BUCKET_COUNT]
+                        [--pps-histogram] [--pps-bucket-size PPS_BUCKET_SIZE]
+                        [--pps-bucket-count PPS_BUCKET_COUNT] [--pps-time1 PPS_TIME1]
+
+gpsd_exporter -- Exporter for gpsd output
+
+  Created by Brendan Bank on 2021-01-10.
+  Copyright 2021 Brendan Bank. All rights reserved.
+
+  Licensed under the BSD-3-Clause
+  https://opensource.org/licenses/BSD-3-Clause
+
+  Distributed on an "AS IS" basis without warranties
+  or conditions of any kind, either express or implied.
+
+USAGE
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         set verbosity level [default: None]
+  -V, --version         show program's version number and exit
+  -d, --debug           set debug level [default: 0]
+  -p PORT, --port PORT  set gpsd TCP Port number [default: 2947]
+  -H HOSTNAME, --hostname HOSTNAME
+                        set gpsd TCP Hostname/IP address [default: localhost]
+  -E EXPORTER_PORT, --exporter-port EXPORTER_PORT
+                        set TCP Port for the exporter server [default: 9015]
+  -S, --disable-monitor-satellites
+                        Stops monitoring all satellites individually
+  --offset-from-geopoint
+                        track offset (x,y offset and distance) from a stationary location.
+  --geopoint-lat GEO_LAT
+                        Latitude of a fixed stationary location.
+  --geopoint-lon GEO_LON
+                        Longitude of a fixed stationary location.
+  --geo-bucket-size GEO_BUCKET_SIZE
+                        Bucket side of Geo histogram [default: 0.5 meter]
+  --geo-bucket-count GEO_BUCKET_COUNT
+                        Bucket count of Geo histogram [default: 40]
+  --pps-histogram       generate histogram data from pps devices.
+  --pps-bucket-size PPS_BUCKET_SIZE
+                        Bucket side of PPS histogram in nanoseconds. [default: 250 ns]
+  --pps-bucket-count PPS_BUCKET_COUNT
+                        Bucket count of PPS histogram [default: 40]
+  --pps-time1 PPS_TIME1
+                        Local pps clock (offset) time1 (ntp.conf) [default: 0]
 ```
 
 ## Docker 
@@ -181,13 +181,13 @@ You can run this software with docker.
 
 ### Docker Run
 ```bash
-    docker run -d --name gpsd-exporter \
-        -p 9015:9015 \
-        -e GPSD_HOST=192.168.1.10 \
-        -e GPSD_PORT=2947 \
-        -e GEOPOINT_LON=38.897809878 \
-        -e GEOPOINT_LAT=-77.036551259 \
-        ghcr.io/ncareau/gpsd-prometheus-exporter:latest
+docker run -d --name gpsd-exporter \
+    -p 9015:9015 \
+    -e GPSD_HOST=192.168.1.10 \
+    -e GPSD_PORT=2947 \
+    -e GEOPOINT_LON=38.897809878 \
+    -e GEOPOINT_LAT=-77.036551259 \
+    ghcr.io/ncareau/gpsd-prometheus-exporter:latest
 ```
 
 ### Docker Compose
@@ -226,21 +226,21 @@ services:
 If the gpsd daemon run directly on the host, you must either use network_mode: host
 
 ```bash
-    # Docker CLI
-    --network=host
+# Docker CLI
+--network=host
 ```
 ```yaml
-    # Docker Compose
+# Docker Compose
     network_mode: host
 ```
 or by adding `host.docker.internal` to connect the host
 ```bash
-    # Docker CLI - Remove "-p 9015:9015"
+# Docker CLI - Remove "-p 9015:9015"
     -e GPSD_HOST=host.docker.internal \
     --add-host=host.docker.internal:host-gateway \
 ```
 ```yaml
-    # Docker compose - Remove `ports:`
+# Docker compose - Remove `ports:`
     extra_hosts:
         - "host.docker.internal:host-gateway"
 
